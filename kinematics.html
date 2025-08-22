@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Kinematics with Fun</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #474747;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom-color: #ffbd59;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 0 15px 15px;
+            padding: 20px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            border-radius: 10px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffbd59;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffbd59;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .animation-section {
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .sequence-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .sequence-input:focus {
+            border-color: #ffbd59;
+            outline: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #ffbd59;
+            color: #474747;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #ffb347;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #474747;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a5a5a;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .speed-control {
+            margin-top: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .status {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #495057;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .canvas-container {
+                height: 400px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Learn Kinematics with Fun</h1>
+        <p style="color: rgba(255,255,255,0.9);">Interactive Robotic Arm Visualization</p>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab(0)">TAB1 - Ground Mount</button>
+            <button class="tab-button" onclick="switchTab(1)">TAB2 - Ceiling Mount</button>
+        </div>
+
+        <div class="tab-content active" id="tab1">
+            <div class="workspace">
+                <div class="canvas-container">
+                    <canvas id="canvas1" width="600" height="500"></canvas>
+                </div>
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Joint Controls</h3>
+                        
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Joint 1 (Base)</span>
+                                <span id="j1-value1">90°</span>
+                            </div>
+                            <input type="range" id="j1-slider1" class="slider" min="0" max="180" value="90">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Joint 2 (Elbow)</span>
+                                <span id="j2-value1">45°</span>
+                            </div>
+                            <input type="range" id="j2-slider1" class="slider" min="0" max="180" value="45">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Joint 3 (Wrist)</span>
+                                <span id="j3-value1">90°</span>
+                            </div>
+                            <input type="range" id="j3-slider1" class="slider" min="0" max="180" value="90">
+                        </div>
+                    </div>
+
+                    <div class="control-group animation-section">
+                        <h3>Animation Sequence</h3>
+                        <textarea 
+                            id="sequence1" 
+                            class="sequence-input" 
+                            placeholder="Enter joint angles as:&#10;[90,45,90]&#10;[120,60,45]&#10;[45,90,120]&#10;[90,45,90]">[90,45,90]
+[120,60,45]
+[45,90,120]
+[90,45,90]</textarea>
+                        
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="startAnimation(1)">Play</button>
+                            <button class="btn btn-secondary" onclick="pauseAnimation(1)">Pause</button>
+                            <button class="btn btn-secondary" onclick="stopAnimation(1)">Stop</button>
+                        </div>
+
+                        <div class="speed-control">
+                            <div class="slider-label">
+                                <span>Animation Speed</span>
+                                <span id="speed-value1">1x</span>
+                            </div>
+                            <input type="range" id="speed-slider1" class="slider" min="0.5" max="3" step="0.1" value="1">
+                        </div>
+
+                        <div class="status" id="status1">Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab2">
+            <div class="workspace">
+                <div class="canvas-container">
+                    <canvas id="canvas2" width="600" height="500"></canvas>
+                </div>
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Joint Controls</h3>
+                        
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Joint 1 (Base)</span>
+                                <span id="j1-value2">90°</span>
+                            </div>
+                            <input type="range" id="j1-slider2" class="slider" min="0" max="180" value="90">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Joint 2 (Elbow)</span>
+                                <span id="j2-value2">45°</span>
+                            </div>
+                            <input type="range" id="j2-slider2" class="slider" min="0" max="180" value="45">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Joint 3 (Wrist)</span>
+                                <span id="j3-value2">90°</span>
+                            </div>
+                            <input type="range" id="j3-slider2" class="slider" min="0" max="180" value="90">
+                        </div>
+                    </div>
+
+                    <div class="control-group animation-section">
+                        <h3>Animation Sequence</h3>
+                        <textarea 
+                            id="sequence2" 
+                            class="sequence-input" 
+                            placeholder="Enter joint angles as:&#10;[90,45,90]&#10;[120,60,45]&#10;[45,90,120]&#10;[90,45,90]">[90,45,90]
+[60,120,45]
+[120,30,135]
+[90,45,90]</textarea>
+                        
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="startAnimation(2)">Play</button>
+                            <button class="btn btn-secondary" onclick="pauseAnimation(2)">Pause</button>
+                            <button class="btn btn-secondary" onclick="stopAnimation(2)">Stop</button>
+                        </div>
+
+                        <div class="speed-control">
+                            <div class="slider-label">
+                                <span>Animation Speed</span>
+                                <span id="speed-value2">1x</span>
+                            </div>
+                            <input type="range" id="speed-slider2" class="slider" min="0.5" max="3" step="0.1" value="1">
+                        </div>
+
+                        <div class="status" id="status2">Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Powered by <strong>BeeBotix</strong>
+    </div>
+
+    <script>
+        // Robot arm configuration
+        const LINK_LENGTHS = [80, 80, 60]; // Link lengths in pixels
+        const JOINT_RADIUS = 8;
+        
+        // Animation state
+        let animationStates = {
+            1: { playing: false, paused: false, currentStep: 0, sequence: [], progress: 0 },
+            2: { playing: false, paused: false, currentStep: 0, sequence: [], progress: 0 }
+        };
+
+        // Current joint angles for each tab
+        let currentAngles = {
+            1: [90, 45, 90],
+            2: [90, 45, 90]
+        };
+
+        // Target angles for smooth animation
+        let targetAngles = {
+            1: [90, 45, 90],
+            2: [90, 45, 90]
+        };
+
+        function switchTab(tabIndex) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === tabIndex);
+            });
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach((content, idx) => {
+                content.classList.toggle('active', idx === tabIndex);
+            });
+
+            // Redraw the active canvas
+            drawRobotArm(tabIndex + 1);
+        }
+
+        function setupEventListeners() {
+            // Setup sliders for both tabs
+            for (let tab = 1; tab <= 2; tab++) {
+                ['j1', 'j2', 'j3'].forEach((joint, index) => {
+                    const slider = document.getElementById(`${joint}-slider${tab}`);
+                    const valueLabel = document.getElementById(`${joint}-value${tab}`);
+                    
+                    slider.addEventListener('input', (e) => {
+                        const angle = parseInt(e.target.value);
+                        valueLabel.textContent = angle + '°';
+                        currentAngles[tab][index] = angle;
+                        targetAngles[tab][index] = angle;
+                        drawRobotArm(tab);
+                    });
+                });
+
+                // Speed control
+                const speedSlider = document.getElementById(`speed-slider${tab}`);
+                const speedValue = document.getElementById(`speed-value${tab}`);
+                
+                speedSlider.addEventListener('input', (e) => {
+                    speedValue.textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+                });
+            }
+        }
+
+        function drawRobotArm(tab) {
+            const canvas = document.getElementById(`canvas${tab}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set canvas center
+            const centerX = canvas.width / 2;
+            const centerY = tab === 1 ? canvas.height - 50 : 50; // Ground vs ceiling mount
+            
+            // Draw mounting surface
+            drawMountingSurface(ctx, canvas, tab === 1);
+            
+            // Calculate joint positions using forward kinematics
+            const positions = calculateForwardKinematics(currentAngles[tab], centerX, centerY, tab === 1);
+            
+            // Draw robot arm
+            drawLinks(ctx, positions);
+            drawJoints(ctx, positions);
+            
+            // Draw end effector path (trail)
+            drawEndEffectorPath(ctx, tab);
+        }
+
+        function drawMountingSurface(ctx, canvas, isGroundMount) {
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            
+            if (isGroundMount) {
+                // Ground mounting surface
+                const y = canvas.height - 30;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+                
+                // Hatching pattern
+                ctx.lineWidth = 1;
+                for (let x = 0; x < canvas.width; x += 10) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + 8, y + 15);
+                    ctx.stroke();
+                }
+            } else {
+                // Ceiling mounting surface
+                const y = 30;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+                
+                // Hatching pattern
+                ctx.lineWidth = 1;
+                for (let x = 0; x < canvas.width; x += 10) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + 8, y - 15);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function calculateForwardKinematics(angles, baseX, baseY, isGroundMount) {
+            const positions = [{x: baseX, y: baseY}];
+            let currentX = baseX;
+            let currentY = baseY;
+            let cumulativeAngle = 0;
+            
+            for (let i = 0; i < 3; i++) {
+                // Convert angle to radians with proper 0-180 mapping
+                let angleRad;
+                if (isGroundMount) {
+                    // For ground mount: 0° = horizontal right, 90° = up, 180° = horizontal left
+                    // Flip Y direction by negating the sine component
+                    angleRad = -(angles[i]) * Math.PI / 180;
+                } else {
+                    // For ceiling mount: 0° = horizontal right, 90° = down, 180° = horizontal left
+                    angleRad = (180 - angles[i]) * Math.PI / 180;
+                }
+                
+                if (i === 0) {
+                    // First joint rotates from base
+                    cumulativeAngle = angleRad;
+                } else {
+                    // Subsequent joints are relative to previous
+                    if (isGroundMount) {
+                        cumulativeAngle += (angleRad + Math.PI/2);
+                    } else {
+                        cumulativeAngle += (angleRad - Math.PI/2);
+                    }
+                }
+                
+                // Calculate next joint position
+                currentX += LINK_LENGTHS[i] * Math.cos(cumulativeAngle);
+                currentY += LINK_LENGTHS[i] * Math.sin(cumulativeAngle);
+                
+                positions.push({x: currentX, y: currentY});
+            }
+            
+            return positions;
+        }
+
+        function drawLinks(ctx, positions) {
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            
+            for (let i = 0; i < positions.length - 1; i++) {
+                ctx.beginPath();
+                ctx.moveTo(positions[i].x, positions[i].y);
+                ctx.lineTo(positions[i + 1].x, positions[i + 1].y);
+                ctx.stroke();
+            }
+        }
+
+        function drawJoints(ctx, positions) {
+            // Draw regular joints (circles)
+            ctx.fillStyle = '#ff4444';
+            ctx.strokeStyle = '#cc0000';
+            ctx.lineWidth = 2;
+            
+            // Draw all joints except the last one as circles
+            for (let i = 0; i < positions.length - 1; i++) {
+                ctx.beginPath();
+                ctx.arc(positions[i].x, positions[i].y, JOINT_RADIUS, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            // Draw end effector as a pointed triangle (red)
+            const endPos = positions[positions.length - 1];
+            const prevPos = positions[positions.length - 2];
+            
+            // Calculate direction for the triangle point
+            const dx = endPos.x - prevPos.x;
+            const dy = endPos.y - prevPos.y;
+            const angle = Math.atan2(dy, dx);
+            
+            // Draw triangle pointing in the direction of movement
+            ctx.fillStyle = '#ff4444';
+            ctx.strokeStyle = '#cc0000';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            // Triangle vertices
+            const size = 12;
+            ctx.moveTo(
+                endPos.x + size * Math.cos(angle),
+                endPos.y + size * Math.sin(angle)
+            );
+            ctx.lineTo(
+                endPos.x + size * Math.cos(angle + 2.5),
+                endPos.y + size * Math.sin(angle + 2.5)
+            );
+            ctx.lineTo(
+                endPos.x + size * Math.cos(angle - 2.5),
+                endPos.y + size * Math.sin(angle - 2.5)
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawEndEffectorPath(ctx, tab) {
+            // Remove the green circle since we now have a red triangular end effector
+            // This function can be used for future trail/path features
+        }
+
+        function parseSequence(sequenceText) {
+            try {
+                const lines = sequenceText.trim().split('\n');
+                const sequence = [];
+                
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed && trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                        const angles = JSON.parse(trimmed);
+                        if (angles.length === 3) {
+                            sequence.push(angles.map(a => Math.max(0, Math.min(180, a))));
+                        }
+                    }
+                }
+                
+                return sequence;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function startAnimation(tab) {
+            const sequenceText = document.getElementById(`sequence${tab}`).value;
+            const sequence = parseSequence(sequenceText);
+            
+            if (!sequence || sequence.length === 0) {
+                updateStatus(tab, 'Error: Invalid sequence format');
+                return;
+            }
+            
+            animationStates[tab] = {
+                playing: true,
+                paused: false,
+                currentStep: 0,
+                sequence: sequence,
+                progress: 0,
+                startTime: Date.now()
+            };
+            
+            updateStatus(tab, `Playing ${sequence.length} keyframes`);
+            animateStep(tab);
+        }
+
+        function pauseAnimation(tab) {
+            animationStates[tab].paused = !animationStates[tab].paused;
+            if (!animationStates[tab].paused) {
+                animateStep(tab);
+            }
+            updateStatus(tab, animationStates[tab].paused ? 'Paused' : 'Playing');
+        }
+
+        function stopAnimation(tab) {
+            animationStates[tab].playing = false;
+            animationStates[tab].paused = false;
+            updateStatus(tab, 'Stopped');
+        }
+
+        function animateStep(tab) {
+            const state = animationStates[tab];
+            
+            if (!state.playing || state.paused) return;
+            
+            const speed = parseFloat(document.getElementById(`speed-slider${tab}`).value);
+            let currentTarget = state.sequence[state.currentStep];
+            let nextTarget = state.sequence[(state.currentStep + 1) % state.sequence.length];
+            
+            // Smooth interpolation
+            state.progress += 0.02 * speed;
+            
+            if (state.progress >= 1) {
+                state.progress = 0;
+                state.currentStep = (state.currentStep + 1) % state.sequence.length;
+                currentTarget = state.sequence[state.currentStep];
+                nextTarget = state.sequence[(state.currentStep + 1) % state.sequence.length];
+            }
+            
+            // Interpolate angles
+            for (let i = 0; i < 3; i++) {
+                const from = currentTarget[i];
+                const to = nextTarget[i];
+                const interpolated = from + (to - from) * easeInOutSine(state.progress);
+                
+                currentAngles[tab][i] = interpolated;
+                
+                // Update sliders
+                const slider = document.getElementById(`j${i+1}-slider${tab}`);
+                const valueLabel = document.getElementById(`j${i+1}-value${tab}`);
+                slider.value = Math.round(interpolated);
+                valueLabel.textContent = Math.round(interpolated) + '°';
+            }
+            
+            drawRobotArm(tab);
+            
+            if (state.playing) {
+                requestAnimationFrame(() => animateStep(tab));
+            }
+        }
+
+        function easeInOutSine(t) {
+            return -(Math.cos(Math.PI * t) - 1) / 2;
+        }
+
+        function updateStatus(tab, message) {
+            document.getElementById(`status${tab}`).textContent = message;
+        }
+
+        // Initialize the application
+        function init() {
+            setupEventListeners();
+            
+            // Initial draw
+            drawRobotArm(1);
+            drawRobotArm(2);
+            
+            // Animation loop for smooth updates
+            function animate() {
+                // Update current angles towards target angles for smooth movement
+                for (let tab = 1; tab <= 2; tab++) {
+                    let needsRedraw = false;
+                    for (let i = 0; i < 3; i++) {
+                        const diff = targetAngles[tab][i] - currentAngles[tab][i];
+                        if (Math.abs(diff) > 0.1) {
+                            currentAngles[tab][i] += diff * 0.1;
+                            needsRedraw = true;
+                        }
+                    }
+                    if (needsRedraw && !animationStates[tab].playing) {
+                        drawRobotArm(tab);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Start the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeBotix Learning Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #474747;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            background: rgba(255, 189, 89, 0.1);
+            border-radius: 15px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ffbd59;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .book-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .book-header {
+            background: linear-gradient(135deg, #ffbd59, #ffa726);
+            color: #474747;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .book-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .book-header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 0;
+        }
+
+        .chapter {
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 189, 89, 0.2);
+        }
+
+        .chapter-content {
+            padding: 30px;
+            color: #474747;
+        }
+
+        .chapter-number {
+            display: inline-block;
+            background: #ffbd59;
+            color: #474747;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .chapter-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .chapter-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .chapter-topics {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .chapter-topics li {
+            color: #777;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .chapter-topics li:before {
+            content: "▶";
+            color: #ffbd59;
+            position: absolute;
+            left: 0;
+            font-size: 0.8rem;
+        }
+
+        .chapter-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-available {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-coming-soon {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .chapter-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer h3 {
+            color: #ffbd59;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .footer p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .footer .brand {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffbd59;
+            margin-top: 20px;
+        }
+
+        .breadcrumb {
+            background: rgba(255, 189, 89, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .header .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .book-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .chapters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chapter {
+                border-right: none;
+            }
+
+            .chapter-content {
+                padding: 25px 20px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
+            .chapter-content {
+                padding: 20px 15px;
+            }
+        }
+
+        .intro-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: #474747;
+        }
+
+        .intro-section h2 {
+            color: #ffbd59;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+        }
+
+        .intro-section p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BeeBotix Learning Hub</h1>
+            <p class="subtitle">Interactive Robotics & Engineering Education</p>
+            <p class="description">
+                Master robotics concepts through hands-on interactive simulations and visual learning experiences. 
+                From basic kinematics to advanced control systems, explore the fascinating world of robotics.
+            </p>
+        </div>
+
+        <div class="breadcrumb">
+            <strong>Navigation:</strong> Home > Learning Modules
+        </div>
+
+        <div class="intro-section">
+            <h2>Welcome to Interactive Learning</h2>
+            <p>
+                Our comprehensive robotics curriculum is designed to take you from fundamental concepts to advanced applications. 
+                Each module combines theoretical knowledge with practical, interactive demonstrations that make complex topics easy to understand.
+            </p>
+            <p>
+                Click on any available chapter below to begin your journey into the exciting world of robotics and automation.
+            </p>
+        </div>
+
+        <div class="book-container">
+            <div class="book-header">
+                <h2>Robotics Fundamentals Curriculum</h2>
+                <p>Interactive modules for comprehensive robotics education</p>
+            </div>
+
+            <div class="chapters-grid">
+                <!-- Chapter 1: Kinematics -->
+                <div class="chapter">
+                    <a href="/kinematics.html" class="chapter-link"></a>
+                    <div class="chapter-content">
+                        <div class="chapter-number">Chapter 1</div>
+                        <h3 class="chapter-title">Robot Kinematics & Motion</h3>
+                        <p class="chapter-description">
+                            Learn forward and inverse kinematics through interactive 3-joint robotic arm simulations. 
+                            Understand how joint angles translate to end-effector positions in both ground and ceiling mounted configurations.
+                        </p>
+                        <ul class="chapter-topics">
+                            <li>Forward Kinematics Calculations</li>
+                            <li>Joint Angle Control (0-180°)</li>
+                            <li>Real-time Animation Sequences</li>
+                            <li>Ground vs Ceiling Mount Configurations</li>
+                            <li>End-Effector Path Visualization</li>
+                        </ul>
+                        <span class="chapter-status status-available">✓ Available Now</span>
+                    </div>
+                </div>
+
+                <!-- Chapter 2: Dynamics -->
+                <div class="chapter">
+                    <div class="chapter-content">
+                        <div class="chapter-number">Chapter 2</div>
+                        <h3 class="chapter-title">Robot Dynamics & Forces</h3>
+                        <p class="chapter-description">
+                            Explore the relationship between forces, torques, and motion in robotic systems. 
+                            Understand how mass, inertia, and external forces affect robot movement and control.
+                        </p>
+                        <ul class="chapter-topics">
+                            <li>Newton-Euler Dynamics</li>
+                            <li>Torque and Force Analysis</li>
+                            <li>Mass and Inertia Effects</li>
+                            <li>Gravity Compensation</li>
+                            <li>Dynamic Simulation</li>
+                        </ul>
+                        <span class="chapter-status status-coming-soon">🚧 Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Chapter 3: Control Systems -->
+                <div class="chapter">
+                    <div class="chapter-content">
+                        <div class="chapter-number">Chapter 3</div>
+                        <h3 class="chapter-title">Control Systems & Feedback</h3>
+                        <p class="chapter-description">
+                            Master PID control, feedback systems, and advanced control algorithms for precise robot motion. 
+                            Interactive controllers with real-time parameter tuning and response visualization.
+                        </p>
+                        <ul class="chapter-topics">
+                            <li>PID Controller Design</li>
+                            <li>Feedback Loop Analysis</li>
+                            <li>System Stability</li>
+                            <li>Control Parameter Tuning</li>
+                            <li>Advanced Control Strategies</li>
+                        </ul>
+                        <span class="chapter-status status-coming-soon">🚧 Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Chapter 4: Path Planning -->
+                <div class="chapter">
+                    <div class="chapter-content">
+                        <div class="chapter-number">Chapter 4</div>
+                        <h3 class="chapter-title">Path Planning & Navigation</h3>
+                        <p class="chapter-description">
+                            Learn trajectory generation, obstacle avoidance, and optimal path planning algorithms. 
+                            Visualize different planning strategies in various environments and scenarios.
+                        </p>
+                        <ul class="chapter-topics">
+                            <li>Trajectory Generation</li>
+                            <li>Obstacle Avoidance</li>
+                            <li>A* and RRT Algorithms</li>
+                            <li>Motion Constraints</li>
+                            <li>Real-time Path Optimization</li>
+                        </ul>
+                        <span class="chapter-status status-coming-soon">🚧 Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Chapter 5: Sensors -->
+                <div class="chapter">
+                    <div class="chapter-content">
+                        <div class="chapter-number">Chapter 5</div>
+                        <h3 class="chapter-title">Sensors & Perception</h3>
+                        <p class="chapter-description">
+                            Understand various sensor technologies used in robotics including encoders, IMUs, cameras, and LIDAR. 
+                            Learn sensor fusion and perception algorithms for environmental understanding.
+                        </p>
+                        <ul class="chapter-topics">
+                            <li>Encoder and Position Sensing</li>
+                            <li>IMU and Orientation</li>
+                            <li>Vision and Image Processing</li>
+                            <li>LIDAR and Distance Sensing</li>
+                            <li>Sensor Fusion Techniques</li>
+                        </ul>
+                        <span class="chapter-status status-coming-soon">🚧 Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Chapter 6: Machine Learning -->
+                <div class="chapter">
+                    <div class="chapter-content">
+                        <div class="chapter-number">Chapter 6</div>
+                        <h3 class="chapter-title">AI & Machine Learning</h3>
+                        <p class="chapter-description">
+                            Explore how artificial intelligence and machine learning enhance robotic capabilities. 
+                            From reinforcement learning to neural networks for robot control and decision making.
+                        </p>
+                        <ul class="chapter-topics">
+                            <li>Reinforcement Learning</li>
+                            <li>Neural Network Control</li>
+                            <li>Computer Vision</li>
+                            <li>Autonomous Decision Making</li>
+                            <li>Learning from Demonstration</li>
+                        </ul>
+                        <span class="chapter-status status-coming-soon">🚧 Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <h3>About BeeBotix Learning Hub</h3>
+                <p>
+                    Our mission is to make robotics education accessible, engaging, and effective through 
+                    interactive simulations and hands-on learning experiences.
+                </p>
+                <p>
+                    Each module is carefully crafted to build upon previous concepts while providing 
+                    practical applications and real-world examples.
+                </p>
+                <div class="brand">Powered by BeeBotix</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth scrolling and hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scroll to sections
+            const chapters = document.querySelectorAll('.chapter');
+            
+            chapters.forEach(chapter => {
+                chapter.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                chapter.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Add click analytics (placeholder for future implementation)
+            const chapterLinks = document.querySelectorAll('.chapter-link');
+            chapterLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const chapterTitle = this.parentElement.querySelector('.chapter-title').textContent;
+                    console.log(`Navigating to: ${chapterTitle}`);
+                    // Here you could add analytics tracking
+                });
+            });
+
+            // Add loading animation for future chapters
+            const comingSoonChapters = document.querySelectorAll('.status-coming-soon');
+            comingSoonChapters.forEach(status => {
+                status.parentElement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const title = this.querySelector('.chapter-title').textContent;
+                    alert(`"${title}" is currently under development. Stay tuned for updates!`);
+                });
+            });
+        });
+
+        // Simple animation on scroll (intersection observer)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Apply animation to chapters
+        document.addEventListener('DOMContentLoaded', function() {
+            const chapters = document.querySelectorAll('.chapter');
+            chapters.forEach((chapter, index) => {
+                chapter.style.opacity = '0';
+                chapter.style.transform = 'translateY(20px)';
+                chapter.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+                observer.observe(chapter);
+            });
+        });
+    </script>
+</body>
+</html>

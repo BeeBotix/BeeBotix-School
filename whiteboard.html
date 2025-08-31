@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beebotix School Whiteboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary: #ffbd59;
+      --dark: #474747;
+      --light: #ededed;
+      --white: #ffffff;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--light);
+      font-family: 'DotGothic16', sans-serif;
+    }
+    .board-wrap{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      background: var(--light);
+    }
+    #board{
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--white);
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .toolbar{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .75rem;
+      padding: .6rem .8rem;
+      background: var(--dark);
+      color: var(--white);
+      border-top: 2px solid var(--primary);
+    }
+    .tool-group{ display:flex; align-items:center; gap:.5rem; }
+
+    .chip{
+      padding:.5rem .75rem; border-radius: 8px; 
+      background: var(--light); color: var(--dark);
+      border: none; cursor:pointer;
+      font-family: 'DotGothic16', sans-serif;
+      transition: background .2s ease;
+    }
+    .chip:hover{ background: var(--primary); color: var(--dark); }
+    .chip[aria-pressed="true"]{ background: var(--primary); color: var(--dark); }
+
+    .swatch{
+      width: 28px; height: 28px; border-radius: 6px;
+      border:1px solid var(--dark); cursor:pointer;
+    }
+    .swatch[aria-current="true"]{ outline: 3px solid var(--primary); outline-offset: 2px; }
+
+    .slider{ accent-color: var(--primary); }
+
+    .watermark{
+      position: absolute; right: 16px; bottom: 80px; 
+      font-family: 'DotGothic16', sans-serif;
+      font-size: 20px; font-weight: bold;
+      user-select: none; pointer-events: none;
+    }
+    .watermark .bee{ color: var(--primary); }
+    .watermark .rest{ color: var(--dark); }
+
+    @media (max-width: 640px){
+      .toolbar{ gap:.5rem; justify-content:center; }
+      .label{ display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="board-wrap">
+    <canvas id="board"></canvas>
+    <div class="toolbar" role="toolbar" aria-label="Whiteboard tools">
+      <div class="tool-group" id="modeGroup">
+        <button class="chip" id="penBtn" aria-pressed="true" title="Pen (P)">✏️ <span class="label">Pen</span></button>
+        <button class="chip" id="eraserBtn" aria-pressed="false" title="Eraser (E)">🧽 <span class="label">Eraser</span></button>
+      </div>
+      <div class="tool-group" id="colorGroup" aria-label="Colors">
+        <span class="swatch" data-color="#474747" style="background:#474747"></span>
+        <span class="swatch" data-color="#000000" style="background:#000000"></span>
+        <span class="swatch" data-color="#ffbd59" style="background:#ffbd59"></span>
+        <span class="swatch" data-color="#ffffff" style="background:#ffffff"></span>
+        <input id="colorPicker" type="color" value="#474747" title="Custom color" style="width:32px;height:32px;border:none;background:transparent;cursor:pointer"/>
+      </div>
+      <div class="tool-group" id="sizeGroup">
+        <span class="label">Size:</span>
+        <input id="size" class="slider" type="range" min="1" max="40" value="6" />
+        <span id="sizeVal">6px</span>
+      </div>
+      <div style="margin-left:auto;opacity:.7;" class="label">P = Pen, E = Eraser, D = Download, C = Clear</div>
+      <div class="tool-group">
+        <button class="chip" id="clearBtn" title="Clear (C)">🗑️</button>
+        <button class="chip" id="downloadBtn" title="Download PNG (D)">⬇️</button>
+      </div>
+    </div>
+  </div>
+  <div class="watermark"><span class="bee">Bee</span><span class="rest">botix School</span></div>
+
+  <script>
+    (function(){
+      const canvas = document.getElementById('board');
+      const ctx = canvas.getContext('2d');
+
+      const penBtn = document.getElementById('penBtn');
+      const eraserBtn = document.getElementById('eraserBtn');
+      const colorPicker = document.getElementById('colorPicker');
+      const size = document.getElementById('size');
+      const sizeVal = document.getElementById('sizeVal');
+      const clearBtn = document.getElementById('clearBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const swatches = Array.from(document.querySelectorAll('.swatch'));
+
+      let drawing = false;
+      let lastX = 0, lastY = 0;
+      let mode = 'pen';
+      let strokeColor = colorPicker.value;
+      let strokeSize = parseInt(size.value, 10);
+
+      function resizeCanvas(){
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.clientWidth * dpr;
+        canvas.height = canvas.clientHeight * dpr;
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      function setMode(next){
+        mode = next;
+        penBtn.setAttribute('aria-pressed', String(mode==='pen'));
+        eraserBtn.setAttribute('aria-pressed', String(mode==='eraser'));
+      }
+
+      function startDraw(x, y){ drawing = true; [lastX, lastY] = [x,y]; ctx.beginPath(); ctx.moveTo(x,y);} 
+      function drawTo(x, y){
+        if(!drawing) return;
+        ctx.lineWidth = strokeSize;
+        if(mode==='eraser'){
+          ctx.globalCompositeOperation='destination-out';
+          ctx.strokeStyle='rgba(0,0,0,1)';
+        } else {
+          ctx.globalCompositeOperation='source-over';
+          ctx.strokeStyle=strokeColor;
+        }
+        ctx.lineTo(x,y);
+        ctx.stroke();
+        [lastX,lastY]=[x,y];
+      }
+      function endDraw(){drawing=false; ctx.closePath();}
+
+      function getPos(evt){
+        const rect = canvas.getBoundingClientRect();
+        if(evt.touches&&evt.touches[0]){
+          return {x:evt.touches[0].clientX-rect.left,y:evt.touches[0].clientY-rect.top};
+        }
+        return {x:evt.clientX-rect.left,y:evt.clientY-rect.top};
+      }
+
+      canvas.addEventListener('mousedown', e=>{const p=getPos(e);startDraw(p.x,p.y);});
+      window.addEventListener('mousemove', e=>{const p=getPos(e);drawTo(p.x,p.y);});
+      window.addEventListener('mouseup', endDraw);
+      canvas.addEventListener('touchstart', e=>{e.preventDefault();const p=getPos(e);startDraw(p.x,p.y);},{passive:false});
+      canvas.addEventListener('touchmove', e=>{e.preventDefault();const p=getPos(e);drawTo(p.x,p.y);},{passive:false});
+      canvas.addEventListener('touchend', e=>{e.preventDefault();endDraw();},{passive:false});
+
+      penBtn.addEventListener('click', ()=>setMode('pen'));
+      eraserBtn.addEventListener('click', ()=>setMode('eraser'));
+
+      size.addEventListener('input', ()=>{strokeSize=parseInt(size.value,10); sizeVal.textContent=strokeSize+'px';});
+      colorPicker.addEventListener('input', ()=>{strokeColor=colorPicker.value; markCurrentSwatch(strokeColor);});
+
+      function markCurrentSwatch(color){
+        swatches.forEach(s=>s.setAttribute('aria-current','false'));
+        const found=swatches.find(s=>s.dataset.color.toLowerCase()===color.toLowerCase());
+        if(found) found.setAttribute('aria-current','true');
+      }
+      swatches.forEach(s=>s.addEventListener('click',()=>{strokeColor=s.dataset.color;colorPicker.value=strokeColor;markCurrentSwatch(strokeColor);setMode('pen');}));
+      markCurrentSwatch(strokeColor);
+
+      clearBtn.addEventListener('click', ()=>ctx.clearRect(0,0,canvas.width,canvas.height));
+      downloadBtn.addEventListener('click', ()=>{const link=document.createElement('a');link.download='beebotix-whiteboard.png';link.href=canvas.toDataURL('image/png');link.click();});
+
+      window.addEventListener('keydown', e=>{
+        if(e.key.toLowerCase()==='e') setMode('eraser');
+        if(e.key.toLowerCase()==='p') setMode('pen');
+        if(e.key.toLowerCase()==='c') ctx.clearRect(0,0,canvas.width,canvas.height);
+        if(e.key.toLowerCase()==='d'){const link=document.createElement('a');link.download='beebotix-whiteboard.png';link.href=canvas.toDataURL('image/png');link.click();}
+      });
+    })();
+  </script>
+</body>
+</html>
